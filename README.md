@@ -11,7 +11,7 @@ Your goal is to:
 - Evaluate what your system gets right and wrong
 - Reflect on how this mirrors real world AI recommenders
 
-Replace this paragraph with your own summary of what your version does.
+My version scores each song by comparing it to a user's favorite genre, favorite mood, and target energy level. Songs that match genre and mood and are close to the target energy receive higher scores. The system ranks all songs by score and returns the top recommendations with short explanations.
 
 ---
 
@@ -23,11 +23,45 @@ Some prompts to answer:
 
 - What features does each `Song` use in your system
   - For example: genre, mood, energy, tempo
+  - Each Song has: id, title, artist, genre, mood, energy, tempo_bpm, valence, danceability, acousticness
+
 - What information does your `UserProfile` store
+  - It stores the following:
+    - favorite_genre: the user's preferred genre
+    - favorite_mood: the user's preferred mood
+    - target_energy: the energy level they want (as a float)
+    - likes_acoustic: whether they prefer acoustic songs (True/False)
+
 - How does your `Recommender` compute a score for each song
+  - The way that it works is the following: 
+    - 1. Computes how well one song matches the user.
+    - 2. It then produces a comparable numeric value (between 0 - 1)
+    - 3. Lastly it then lets you tune feature importance with weights
+
 - How do you choose which songs to recommend
+  - 1. Score each song against the user profile
+  - 2. Then it ranks each songs by final score
 
 You can include a simple diagram or bullet list if helpful.
+
+### Finalized Algorithm Recipe
+
+1. Load the song catalog from `data/songs.csv`.
+2. Represent each song with features: genre, mood, and energy (plus other metadata fields).
+3. Represent the user with a taste profile: favorite genre, favorite mood, target energy, and acoustic preference.
+4. For each song, compute a match score:
+  - Add a genre match component (higher if genres match).
+  - Add a mood match component (higher if moods match).
+  - Add an energy similarity component based on how close song energy is to target energy.
+  - Optionally apply feature weights so some signals matter more than others.
+5. Normalize or keep the score on a comparable 0 to 1 scale.
+6. Rank songs from highest score to lowest score.
+7. Return the top `k` songs as recommendations.
+8. Generate a short explanation for each recommendation using the strongest matching features.
+
+![Terminal Screenshot](Terminal%20Screenshot.png)
+
+
 
 ---
 
@@ -87,6 +121,8 @@ Examples:
 - It might over favor one genre or mood
 
 You will go deeper on this in your model card.
+
+Potential bias note: This system might over-prioritize genre, ignoring strong mood or energy matches from songs outside the user's favorite genre.
 
 ---
 
